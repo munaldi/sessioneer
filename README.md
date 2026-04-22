@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Sessioneer
 
 ✨ An interactive **CLI** to browse and manage **Claude Code** and **GitHub Copilot** sessions from the terminal.
@@ -10,12 +11,12 @@ Both Claude Code and GitHub Copilot store local session/conversation files, but 
 
 **Sessioneer** gives you a single keyboard-driven interface for both tools:
 
-- Browse all sessions sorted by date, across both providers
-- Search text across all sessions with highlighted results
-- Preview conversations before acting
-- Fork, merge, prune, trim, rename, or delete sessions
-- View session and project stats (duration, tokens, costs, tool usage)
-- Batch-clean empty session files
+ Browse all sessions sorted by date, across both providers
+ Search text across all sessions with highlighted results
+ Preview conversations before acting
+ Fork, merge, prune, trim, rename, or delete sessions
+ View session and project stats (duration, tokens, costs, tool usage)
+ Batch-clean empty session files
 
 ---
 
@@ -182,3 +183,6 @@ Please open an Issue before submitting a PR for new features, so the API can be 
 ## License
 
 MIT
+=======
+# sessioneer
+>>>>>>> e949fbf1cb23afffa5fc11005f27243e89110187

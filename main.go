@@ -8,12 +8,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/munaldi/sessioneer/internal/config"
 	"github.com/munaldi/sessioneer/internal/tui"
+	"github.com/munaldi/sessioneer/internal/web"
 )
 
 var (
 	flagProvider string
 	flagProject  string
 	flagBase     string
+	flagWeb      bool
+	flagPort     int
 )
 
 var rootCmd = &cobra.Command{
@@ -27,6 +30,11 @@ and delete AI coding sessions for Claude Code and GitHub Copilot.`,
 		cfg, err := config.Resolve(flagProvider, flagProject, flagBase)
 		if err != nil {
 			return fmt.Errorf("invalid arguments: %w", err)
+		}
+
+		if flagWeb {
+			srv := web.New(cfg.Provider, cfg.BaseDir, flagPort)
+			return srv.Run()
 		}
 
 		model := tui.New(cfg.Provider, cfg.BaseDir)
@@ -43,6 +51,8 @@ func init() {
 	rootCmd.Flags().StringVarP(&flagProvider, "provider", "P", "", `AI provider: "claude" or "copilot" (default: auto-detect)`)
 	rootCmd.Flags().StringVarP(&flagProject, "project", "p", "", "Project path (default: current directory)")
 	rootCmd.Flags().StringVarP(&flagBase, "base", "b", "", "Session base directory (default: provider default)")
+	rootCmd.Flags().BoolVarP(&flagWeb, "web", "w", false, "Launch the web UI instead of the terminal UI")
+	rootCmd.Flags().IntVar(&flagPort, "port", 8080, "Port for the web UI (used with --web)")
 }
 
 func main() {

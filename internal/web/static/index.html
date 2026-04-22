@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sessioneer</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   Dracula Dark  (default)
+   https://draculatheme.com/contribute
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --drac-bg:       #282a36;
+  --drac-bg-alt:   #21222c;
+  --drac-current:  #44475a;
+  --drac-fg:       #f8f8f2;
+  --drac-comment:  #6272a4;
+  --drac-cyan:     #8be9fd;
+  --drac-green:    #50fa7b;
+  --drac-orange:   #ffb86c;
+  --drac-pink:     #ff79c6;
+  --drac-purple:   #bd93f9;
+  --drac-red:      #ff5555;
+  --drac-yellow:   #f1fa8c;
+
+  /* Semantic tokens — dark */
+  --bg:          var(--drac-bg);
+  --bg-panel:    var(--drac-bg-alt);
+  --surface:     var(--drac-current);
+  --surface-hi:  #50536b;
+  --border:      var(--drac-current);
+  --border-lo:   #373a4d;
+  --text:        var(--drac-fg);
+  --muted:       var(--drac-comment);
+  --accent:      var(--drac-purple);
+  --accent-hi:   #caa8ff;
+  --accent-dim:  rgba(189,147,249,.18);
+  --success:     var(--drac-green);
+  --danger:      var(--drac-red);
+  --warning:     var(--drac-orange);
+  --cyan:        var(--drac-cyan);
+  --pink:        var(--drac-pink);
+  --yellow:      var(--drac-yellow);
+
+  --radius:      6px;
+  --radius-lg:   10px;
+  --shadow:      0 4px 24px rgba(0,0,0,.45);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Dracula Light  — semantic overrides only
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg:          #f8f8f2;
+  --bg-panel:    #ededf5;
+  --surface:     #e0dfee;
+  --surface-hi:  #d0cfdf;
+  --border:      #c6c5d8;
+  --border-lo:   #d8d7ea;
+  --text:        #282a36;
+  --muted:       #6272a4;
+  --accent:      #7b3fd4;
+  --accent-hi:   #6030b0;
+  --accent-dim:  rgba(123,63,212,.12);
+  --success:     #1a7f37;
+  --danger:      #c42b2b;
+  --warning:     #a05a00;
+  --cyan:        #0277a8;
+  --pink:        #b5006e;
+  --yellow:      #7a6800;
+  --shadow:      0 4px 24px rgba(0,0,0,.12);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Reset & base
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+               ui-monospace, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  transition: background .2s, color .2s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Title bar  (VS Code style — dark strip at top)
+   ═══════════════════════════════════════════════════════════════ */
+.titlebar {
+  background: var(--drac-bg-alt);
+  border-bottom: 1px solid var(--border-lo);
+  padding: 0 16px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+[data-theme="light"] .titlebar { background: #e6e5f0; }
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+
+.logo-icon {
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: var(--drac-bg);
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .logo-icon { color: #fff; }
+
+.titlebar-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.provider-tabs { display: flex; }
+
+.tab {
+  padding: 0 14px;
+  height: 36px;
+  border: none;
+  border-right: 1px solid var(--border-lo);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  transition: background .12s, color .12s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tab:first-child { border-left: 1px solid var(--border-lo); }
+.tab:hover { background: var(--surface); color: var(--text); }
+
+.tab.active {
+  background: var(--bg);
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+[data-theme="light"] .tab.active { background: var(--bg); }
+
+.tab-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  opacity: .7;
+}
+
+.tab.active .tab-dot { opacity: 1; background: var(--accent); }
+
+.titlebar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Action bar  (below title bar)
+   ═══════════════════════════════════════════════════════════════ */
+.actionbar {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 9px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.search-box {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 5px 10px 5px 28px;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.search-box:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+.search-box::placeholder { color: var(--muted); }
+
+.actionbar-right { margin-left: auto; display: flex; gap: 6px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Buttons
+   ═══════════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background .12s, border-color .12s, color .12s;
+}
+
+.btn:hover { background: var(--surface); border-color: var(--muted); }
+
+.btn.accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+[data-theme="light"] .btn.accent { color: #fff; }
+
+.btn.accent:hover {
+  background: var(--accent-hi);
+  border-color: var(--accent-hi);
+}
+
+.btn.ghost {
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.btn.ghost:hover { background: var(--surface); color: var(--text); border-color: var(--border); }
+
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover { background: rgba(255,85,85,.1); }
+
+.btn.icon-btn {
+  width: 28px; height: 28px;
+  padding: 0;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: var(--radius);
+}
+
+.btn:disabled { opacity: .38; cursor: not-allowed; }
+
+/* Theme toggle */
+.theme-btn {
+  width: 28px; height: 28px;
+  padding: 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-lo);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s, color .12s;
+}
+
+.theme-btn:hover { background: var(--surface); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Main layout
+   ═══════════════════════════════════════════════════════════════ */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── Sidebar (VS Code Explorer style) ───────────────────────── */
+.sidebar {
+  width: 290px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-head {
+  padding: 8px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border-lo);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.session-list::-webkit-scrollbar { width: 5px; }
+.session-list::-webkit-scrollbar-track { background: transparent; }
+.session-list::-webkit-scrollbar-thumb {
+  background: var(--surface);
+  border-radius: 3px;
+}
+
+.sidebar-foot {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-lo);
+  display: flex;
+  gap: 6px;
+}
+
+/* ─── Session cards ───────────────────────────────────────────── */
+.card {
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  padding: 8px 10px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  transition: background .1s, border-color .1s;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 2px;
+  border-radius: 1px;
+  background: transparent;
+  transition: background .1s;
+}
+
+.card:hover { background: var(--surface); }
+.card:hover::before { background: var(--muted); }
+
+.card.active {
+  background: var(--accent-dim);
+  border-color: rgba(189,147,249,.22);
+}
+
+[data-theme="light"] .card.active {
+  background: rgba(123,63,212,.08);
+  border-color: rgba(123,63,212,.2);
+}
+
+.card.active::before { background: var(--accent); }
+
+.card input[type=checkbox] {
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  cursor: pointer;
+  width: 13px; height: 13px;
+}
+
+.card-body { flex: 1; min-width: 0; }
+
+.card-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.card.active .card-title { color: var(--accent); }
+.card.empty .card-title { color: var(--muted); font-style: italic; }
+
+.card-meta {
+  color: var(--muted);
+  font-size: 10px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.badge.warn { border-color: var(--warning); color: var(--warning); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Content area
+   ═══════════════════════════════════════════════════════════════ */
+.content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* Placeholder */
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.placeholder-icon {
+  font-size: 40px;
+  opacity: .5;
+}
+
+.placeholder-text { font-size: 13px; }
+
+/* Spinner */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .55s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 36px;
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Session detail
+   ═══════════════════════════════════════════════════════════════ */
+.detail { display: flex; flex-direction: column; height: 100%; }
+
+.detail-head {
+  padding: 16px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-panel);
+}
+
+[data-theme="light"] .detail-head { background: var(--bg-panel); }
+
+.detail-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  word-break: break-word;
+  color: var(--accent);
+}
+
+.detail-meta {
+  display: flex;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 11px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.detail-meta span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.detail-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Messages */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 22px;
+}
+
+.messages::-webkit-scrollbar { width: 5px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 3px; }
+
+.msg { margin-bottom: 16px; }
+
+.msg-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.msg-role-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.msg-role-badge.user {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  background: rgba(139,233,253,.08);
+}
+
+[data-theme="light"] .msg-role-badge.user {
+  background: rgba(2,119,168,.08);
+}
+
+.msg-role-badge.assistant {
+  color: var(--success);
+  border-color: var(--success);
+  background: rgba(80,250,123,.08);
+}
+
+[data-theme="light"] .msg-role-badge.assistant {
+  background: rgba(26,127,55,.08);
+}
+
+.msg-role-badge.tool {
+  color: var(--warning);
+  border-color: var(--warning);
+  background: rgba(255,184,108,.08);
+}
+
+[data-theme="light"] .msg-role-badge.tool {
+  background: rgba(160,90,0,.08);
+}
+
+.msg-role-badge.system {
+  color: var(--muted);
+  border-color: var(--muted);
+  background: rgba(98,114,164,.08);
+}
+
+.msg-tool-name {
+  font-size: 10px;
+  color: var(--warning);
+  opacity: .8;
+}
+
+[data-theme="light"] .msg-tool-name { color: var(--warning); }
+
+.msg-time { font-size: 10px; color: var(--muted); margin-left: auto; }
+
+.msg-body {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-lo);
+  border-radius: var(--radius);
+  padding: 10px 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.msg-body::-webkit-scrollbar { width: 4px; }
+.msg-body::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 2px; }
+
+/* left accent stripe per role */
+.msg.user      .msg-body { border-left: 2px solid var(--cyan); }
+.msg.assistant .msg-body { border-left: 2px solid var(--success); }
+.msg.tool      .msg-body { border-left: 2px solid var(--warning); }
+.msg.system    .msg-body { border-left: 2px solid var(--muted); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Stats view
+   ═══════════════════════════════════════════════════════════════ */
+.stats { padding: 24px; overflow-y: auto; flex: 1; }
+
+.stats-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stats-header h2 { font-size: 17px; font-weight: 700; color: var(--accent); }
+.stats-header .sub { font-size: 11px; color: var(--muted); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.stat-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-lo);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: .5;
+}
+
+.stat-card:nth-child(2)::after { background: var(--cyan); }
+.stat-card:nth-child(3)::after { background: var(--pink); }
+.stat-card:nth-child(4)::after { background: var(--green); }
+.stat-card:nth-child(5)::after { background: var(--orange); }
+.stat-card:nth-child(6)::after { background: var(--yellow); }
+
+.stat-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.stat-card:nth-child(2) .stat-val { color: var(--cyan); }
+.stat-card:nth-child(3) .stat-val { color: var(--pink); }
+.stat-card:nth-child(4) .stat-val { color: var(--success); }
+.stat-card:nth-child(5) .stat-val { color: var(--warning); }
+.stat-card:nth-child(6) .stat-val { color: var(--yellow); }
+
+[data-theme="light"] .stat-val { filter: brightness(.75); }
+
+.stat-lbl {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.tool-table {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-lo);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tool-table-head {
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  border-bottom: 1px solid var(--border-lo);
+  background: var(--surface);
+}
+
+.tool-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--border-lo);
+  font-size: 12px;
+  transition: background .1s;
+}
+
+.tool-row:last-child { border-bottom: none; }
+.tool-row:hover { background: var(--surface); }
+
+.tool-name { color: var(--cyan); }
+[data-theme="light"] .tool-name { color: var(--cyan); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Modal
+   ═══════════════════════════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  width: 430px;
+  max-width: 94vw;
+  box-shadow: var(--shadow);
+  animation: slideUp .15s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.modal-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.modal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  margin-bottom: 16px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.modal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Checkboxes in modal */
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.check-lbl {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: background .1s, border-color .1s;
+}
+
+.check-lbl:hover { background: var(--surface); border-color: var(--border); }
+
+.check-lbl input[type=checkbox] {
+  accent-color: var(--accent);
+  margin-top: 1px;
+  flex-shrink: 0;
+  width: 14px; height: 14px;
+}
+
+.check-body { flex: 1; min-width: 0; }
+.check-label { color: var(--text); margin-bottom: 2px; }
+.check-desc { color: var(--muted); font-size: 11px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Toast
+   ═══════════════════════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  font-size: 12px;
+  z-index: 300;
+  opacity: 0;
+  transform: translateY(10px) scale(.97);
+  transition: opacity .2s, transform .2s;
+  max-width: 320px;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast::before { font-size: 14px; }
+
+.toast.show { opacity: 1; transform: translateY(0) scale(1); }
+.toast.ok  { border-color: var(--success); }
+.toast.ok::before { content: '✓'; color: var(--success); }
+.toast.err { border-color: var(--danger); color: var(--danger); }
+.toast.err::before { content: '✕'; color: var(--danger); }
+.toast.info::before { content: 'ℹ'; color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Status bar  (VS Code bottom bar)
+   ═══════════════════════════════════════════════════════════════ */
+.statusbar {
+  height: 22px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 11px;
+  gap: 14px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+[data-theme="light"] .statusbar { color: #fff; }
+
+.statusbar-item { display: flex; align-items: center; gap: 4px; opacity: .9; }
+.statusbar-sep { opacity: .35; }
+.statusbar-right { margin-left: auto; display: flex; gap: 14px; }
+</style>
+</head>
+<body>
+
+<!-- VS Code–style title bar -->
+<div class="titlebar">
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    Sessioneer
+  </div>
+  <div class="titlebar-sep"></div>
+  <div class="provider-tabs" id="tabs"></div>
+  <div class="titlebar-right">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+  </div>
+</div>
+
+<!-- Action / search bar -->
+<div class="actionbar">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-box" id="search" type="text" placeholder="Search sessions…" />
+  </div>
+  <div class="actionbar-right">
+    <button class="btn ghost" onclick="showStats()">📊 Stats</button>
+    <button class="btn ghost" onclick="cleanEmpty()">🧹 Clean empty</button>
+  </div>
+</div>
+
+<!-- Workspace -->
+<div class="workspace">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <span id="sideHead">Sessions</span>
+    </div>
+    <div class="session-list" id="list"></div>
+    <div class="sidebar-foot">
+      <button class="btn accent" id="mergeBtn" style="display:none" onclick="promptMerge()">⇢ Merge selected</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="content" id="content">
+    <div class="placeholder">
+      <div class="placeholder-icon">🗂</div>
+      <div class="placeholder-text">Select a session to view details</div>
+    </div>
+  </div>
+</div>
+
+<!-- Status bar -->
+<div class="statusbar">
+  <div class="statusbar-item" id="sbProvider">⚡ Sessioneer</div>
+  <div class="statusbar-sep">|</div>
+  <div class="statusbar-item" id="sbCount"></div>
+  <div class="statusbar-right">
+    <div class="statusbar-item" id="sbTheme"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle"></div>
+    <input class="modal-input" id="modalInput" type="text" />
+    <div class="checks" id="modalChecks" style="display:none"></div>
+    <div class="modal-btns">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn accent" onclick="confirmModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+// ─── State ───────────────────────────────────────────────────────
+const st = {
+  provider: null,
+  sessions: [],
+  currentId: null,
+  selected: new Set(),
+  modalCb: null,
+  modalMode: 'text',
+};
+
+// ─── Theme ───────────────────────────────────────────────────────
+const THEME_KEY = 'sessioneer-theme';
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  $('themeBtn').textContent = theme === 'dark' ? '☀️' : '🌙';
+  $('themeBtn').title = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+  $('sbTheme').textContent = theme === 'dark' ? '🌙 Dark' : '☀️ Light';
+  localStorage.setItem(THEME_KEY, theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.dataset.theme;
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// ─── Init ────────────────────────────────────────────────────────
+async function init() {
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+
+  try {
+    const { providers } = await api('GET', '/api/providers');
+    if (!providers || providers.length === 0) {
+      setContent(placeholder('😕', 'No providers detected'));
+      return;
+    }
+    renderTabs(providers);
+    await switchProvider(providers[0]);
+  } catch (e) {
+    toast('Failed to connect to server', 'err');
+  }
+}
+
+function renderTabs(providers) {
+  $('tabs').innerHTML = providers.map(p =>
+    `<button class="tab" data-p="${p}" onclick="switchProvider('${p}')">
+       <span class="tab-dot"></span>${p}
+     </button>`
+  ).join('');
+}
+
+async function switchProvider(p) {
+  st.provider = p;
+  st.currentId = null;
+  st.selected.clear();
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.p === p));
+  $('sbProvider').textContent = `⚡ ${p}`;
+  setContent(placeholder('🗂', 'Select a session to view details'));
+  await loadSessions();
+}
+
+// ─── Sessions ────────────────────────────────────────────────────
+let searchTimer = null;
+$('search').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadSessions(e.target.value), 260);
+});
+
+async function loadSessions(q) {
+  $('list').innerHTML = `<div class="loading"><div class="spinner"></div> Loading…</div>`;
+  let url = `/api/sessions?provider=${st.provider}`;
+  if (q) url += `&q=${enc(q)}`;
+  try {
+    const data = await api('GET', url);
+    st.sessions = data.sessions || [];
+    renderList();
+  } catch (e) {
+    $('list').innerHTML = `<div class="loading">Failed to load</div>`;
+  }
+}
+
+function renderList() {
+  const n = st.sessions.length;
+  $('sideHead').textContent = `${n} session${n !== 1 ? 's' : ''}`;
+  $('sbCount').textContent = `${n} sessions`;
+
+  if (n === 0) {
+    $('list').innerHTML = `<div class="loading" style="color:var(--muted)">No sessions found</div>`;
+    syncMergeBtn();
+    return;
+  }
+
+  $('list').innerHTML = st.sessions.map(s => `
+    <div class="card ${s.id === st.currentId ? 'active' : ''} ${s.isEmpty ? 'empty' : ''}"
+         data-id="${s.id}" onclick="cardClick(event,'${s.id}')">
+      <input type="checkbox" onclick="event.stopPropagation()"
+             onchange="toggleSel('${s.id}',this.checked)"
+             ${st.selected.has(s.id) ? 'checked' : ''} />
+      <div class="card-body">
+        <div class="card-title">${esc(s.title || '(untitled)')}</div>
+        <div class="card-meta">
+          <span>${relDate(s.updatedAt)}</span>
+          <span class="badge">${s.messageCount} msg</span>
+          ${s.isEmpty ? `<span class="badge warn">empty</span>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  syncMergeBtn();
+}
+
+function cardClick(e, id) {
+  if (e.target.type === 'checkbox') return;
+  openSession(id);
+}
+
+function toggleSel(id, checked) {
+  checked ? st.selected.add(id) : st.selected.delete(id);
+  syncMergeBtn();
+}
+
+function syncMergeBtn() {
+  const n = st.selected.size;
+  const btn = $('mergeBtn');
+  btn.style.display = n >= 2 ? '' : 'none';
+  btn.textContent = `⇢ Merge ${n} sessions`;
+}
+
+async function openSession(id) {
+  st.currentId = id;
+  renderList();
+  setContent(`<div class="loading"><div class="spinner"></div> Loading session…</div>`);
+  try {
+    const data = await api('GET', `/api/sessions/${enc(id)}?provider=${st.provider}`);
+    renderDetail(data.session, data.stats);
+  } catch (e) {
+    setContent(placeholder('⚠', esc(e.message)));
+  }
+}
+
+function renderDetail(sess, stats) {
+  const tokens = (stats.totalTokens || 0).toLocaleString();
+  setContent(`
+    <div class="detail">
+      <div class="detail-head">
+        <div class="detail-title">${esc(sess.title || '(untitled)')}</div>
+        <div class="detail-meta">
+          <span>📅 Updated: ${fmtDate(sess.updatedAt)}</span>
+          <span>🕐 Created: ${fmtDate(sess.createdAt)}</span>
+          <span>💬 ${stats.messageCount} messages</span>
+          <span>⏱ ${fmtDur(stats.durationSec)}</span>
+          ${tokens !== '0' ? `<span>🔢 ${tokens} tokens</span>` : ''}
+        </div>
+        <div class="detail-actions">
+          <button class="btn" onclick="promptRename()">✏️ Rename</button>
+          <button class="btn" onclick="promptFork()">⑂ Fork</button>
+          <button class="btn" onclick="promptPrune()">✂️ Prune</button>
+          <button class="btn" onclick="runTrim()">⬆️ Trim</button>
+          <button class="btn danger" onclick="runDelete()">🗑 Delete</button>
+        </div>
+      </div>
+      <div class="messages">${renderMsgs(sess.messages)}</div>
+    </div>`);
+}
+
+function renderMsgs(msgs) {
+  if (!msgs || msgs.length === 0)
+    return `<div class="loading" style="color:var(--muted)">No messages</div>`;
+  return msgs.map(m => `
+    <div class="msg ${m.role}">
+      <div class="msg-header">
+        <span class="msg-role-badge ${m.role}">${m.role}</span>
+        ${m.isTool ? `<span class="msg-tool-name">· ${esc(m.toolName || 'tool')}</span>` : ''}
+        <span class="msg-time">${fmtTime(m.timestamp)}</span>
+      </div>
+      <div class="msg-body">${esc(m.content || '')}</div>
+    </div>`).join('');
+}
+
+// ─── Actions ─────────────────────────────────────────────────────
+function promptRename() {
+  showModal('Rename session', 'New title…', async title => {
+    await api('POST', `/api/sessions/${enc(st.currentId)}/rename?provider=${st.provider}`, {title});
+    toast('Session renamed', 'ok');
+    await loadSessions($('search').value);
+    await openSession(st.currentId);
+  });
+}
+
+function promptFork() {
+  showModal('Fork session', 'Fork title…', async title => {
+    const data = await api('POST', `/api/sessions/${enc(st.currentId)}/fork?provider=${st.provider}`, {title});
+    toast(`Forked as "${data.session.title}"`, 'ok');
+    await loadSessions($('search').value);
+  });
+}
+
+function promptPrune() {
+  const opts = [
+    {key:'removeToolBlocks',    label:'Remove tool blocks',    desc:'Tool calls and their results'},
+    {key:'removeEmptyMessages', label:'Remove empty messages', desc:'Messages with no content'},
+    {key:'removeSystemTags',    label:'Remove system / IDE tags', desc:'&lt;system-reminder&gt;, &lt;ide_selection&gt;, &lt;ide_opened_file&gt;'},
+    {key:'removeShortMessages', label:'Remove short messages', desc:'Messages shorter than 50 characters'},
+  ];
+  showCheckboxModal('Prune session', opts, async checked => {
+    if (!Object.values(checked).some(Boolean)) { toast('Select at least one option', 'err'); return; }
+    await api('POST', `/api/sessions/${enc(st.currentId)}/prune?provider=${st.provider}`, checked);
+    toast('Session pruned', 'ok');
+    await loadSessions($('search').value);
+    await openSession(st.currentId);
+  });
+}
+
+async function runTrim() {
+  if (!confirm('Trim to the second-to-last message?')) return;
+  try {
+    await api('POST', `/api/sessions/${enc(st.currentId)}/trim?provider=${st.provider}`);
+    toast('Session trimmed', 'ok');
+    await loadSessions($('search').value);
+    await openSession(st.currentId);
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function runDelete() {
+  if (!confirm('Delete this session? This cannot be undone.')) return;
+  try {
+    await api('DELETE', `/api/sessions/${enc(st.currentId)}?provider=${st.provider}`);
+    toast('Session deleted', 'ok');
+    st.currentId = null;
+    setContent(placeholder('🗂', 'Select a session to view details'));
+    await loadSessions($('search').value);
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function promptMerge() {
+  showModal('Merge sessions', 'Merged session title…', async title => {
+    const ids = Array.from(st.selected);
+    const data = await api('POST', `/api/sessions/merge?provider=${st.provider}`, {ids, title});
+    toast(`Merged into "${data.session.title}"`, 'ok');
+    st.selected.clear();
+    await loadSessions($('search').value);
+  });
+}
+
+async function cleanEmpty() {
+  if (!confirm('Remove all empty sessions?')) return;
+  try {
+    const data = await api('POST', `/api/clean-empty?provider=${st.provider}`);
+    toast(`Removed ${data.removed} empty session${data.removed !== 1 ? 's' : ''}`, 'ok');
+    await loadSessions($('search').value);
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function showStats() {
+  setContent(`<div class="loading"><div class="spinner"></div> Loading stats…</div>`);
+  try {
+    const s = await api('GET', `/api/stats?provider=${st.provider}`);
+    const tools = Object.entries(s.toolUsage || {}).sort((a,b) => b[1] - a[1]);
+    setContent(`
+      <div class="stats">
+        <div class="stats-header">
+          <h2>Project Statistics</h2>
+          <span class="sub">· ${st.provider}</span>
+        </div>
+        <div class="stats-grid">
+          ${statCard(s.sessionCount,                      'Sessions')}
+          ${statCard(s.messageCount,                      'Messages')}
+          ${statCard(s.userMessages,                      'User messages')}
+          ${statCard(s.llmMessages,                       'AI messages')}
+          ${statCard((s.totalTokens||0).toLocaleString(), 'Total tokens')}
+          ${statCard(fmtDur(s.durationSec),               'Total duration')}
+        </div>
+        ${tools.length ? `
+          <div class="tool-table">
+            <div class="tool-table-head">Tool usage</div>
+            ${tools.map(([n,c]) => `
+              <div class="tool-row">
+                <span class="tool-name">${esc(n)}</span>
+                <span class="badge">${c}</span>
+              </div>`).join('')}
+          </div>` : ''}
+      </div>`);
+  } catch (e) {
+    setContent(placeholder('⚠', esc(e.message)));
+  }
+}
+
+function statCard(val, lbl) {
+  return `<div class="stat-card">
+    <div class="stat-val">${val}</div>
+    <div class="stat-lbl">${lbl}</div>
+  </div>`;
+}
+
+// ─── Modal ───────────────────────────────────────────────────────
+function showModal(title, placeholder, cb) {
+  $('modalTitle').textContent = title;
+  $('modalInput').placeholder = placeholder;
+  $('modalInput').value = '';
+  $('modalInput').style.display = '';
+  $('modalChecks').style.display = 'none';
+  $('overlay').classList.add('open');
+  $('modalInput').focus();
+  st.modalCb = cb;
+  st.modalMode = 'text';
+}
+
+function showCheckboxModal(title, opts, cb) {
+  $('modalTitle').textContent = title;
+  $('modalInput').style.display = 'none';
+  const ch = $('modalChecks');
+  ch.style.display = '';
+  ch.innerHTML = opts.map(o => `
+    <label class="check-lbl">
+      <input type="checkbox" data-key="${o.key}" />
+      <div class="check-body">
+        <div class="check-label">${o.label}</div>
+        <div class="check-desc">${o.desc}</div>
+      </div>
+    </label>`).join('');
+  $('overlay').classList.add('open');
+  st.modalCb = cb;
+  st.modalMode = 'checks';
+}
+
+function closeModal() { $('overlay').classList.remove('open'); st.modalCb = null; }
+
+async function confirmModal() {
+  if (!st.modalCb) return;
+  try {
+    if (st.modalMode === 'text') {
+      const val = $('modalInput').value.trim();
+      if (!val) { toast('Title cannot be empty', 'err'); return; }
+      await st.modalCb(val);
+    } else {
+      const result = {};
+      document.querySelectorAll('#modalChecks input[type=checkbox]')
+        .forEach(cb => { result[cb.dataset.key] = cb.checked; });
+      await st.modalCb(result);
+    }
+    closeModal();
+  } catch (e) { toast(e.message || 'Action failed', 'err'); }
+}
+
+$('modalInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter')  confirmModal();
+  if (e.key === 'Escape') closeModal();
+});
+$('overlay').addEventListener('click', e => { if (e.target === $('overlay')) closeModal(); });
+
+// ─── Helpers ─────────────────────────────────────────────────────
+async function api(method, url, body) {
+  const opts = { method, headers: {} };
+  if (body !== undefined) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, opts);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+function setContent(html) { $('content').innerHTML = html; }
+
+function placeholder(icon, text) {
+  return `<div class="placeholder">
+    <div class="placeholder-icon">${icon}</div>
+    <div class="placeholder-text">${text}</div>
+  </div>`;
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function enc(s) { return encodeURIComponent(s); }
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString(undefined, {
+    month:'short', day:'numeric', year:'numeric',
+    hour:'2-digit', minute:'2-digit',
+  });
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour:'2-digit', minute:'2-digit',
+  });
+}
+
+function relDate(iso) {
+  if (!iso) return '';
+  const mins = Math.floor((Date.now() - new Date(iso)) / 60000);
+  if (mins < 1)  return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
+function fmtDur(secs) {
+  if (!secs || secs < 60) return '<1m';
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+let _toastTimer;
+function toast(msg, type) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type || 'info'}`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+}
+
+init();
+</script>
+</body>
+</html>

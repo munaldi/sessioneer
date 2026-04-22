@@ -1,6 +1,6 @@
 # Sessioneer — Copilot Instructions
 
-This is a Go CLI project that manages AI coding session files for Claude Code (`.jsonl`) and GitHub Copilot (`.json`). It uses Bubble Tea for the TUI.
+This is a Go project that manages AI coding session files for Claude Code (`.jsonl`) and GitHub Copilot (`.json`). It supports both Bubble Tea TUI mode and Web UI mode.
 
 ## Code style
 
@@ -12,11 +12,12 @@ This is a Go CLI project that manages AI coding session files for Claude Code (`
 - All file I/O lives in `internal/session/`
 - All business logic (fork, merge, prune, trim…) lives in `internal/actions/`
 - TUI (Bubble Tea) lives in `internal/tui/`
+- Web server/UI lives in `internal/web/`
 
 ## Import direction (strict — never reverse)
 
 ```
-cmd/ → internal/tui/ → internal/actions/ → internal/session/ → internal/provider/ → pkg/types/
+main.go → internal/tui/ or internal/web/ → internal/actions/ → internal/session/ → internal/provider/ → pkg/types/
 ```
 
 ## Naming conventions
@@ -30,11 +31,14 @@ cmd/ → internal/tui/ → internal/actions/ → internal/session/ → internal/
 
 - New provider → `internal/provider/` + `internal/session/<provider>.go`
 - New action → `internal/actions/<action>.go` + entry in `internal/tui/model.go`
+- Web/API change → `internal/web/server.go` (+ `internal/web/static/` when UI changes)
 - New type → `pkg/types/types.go`
 
 ## Testing
 
 - Run: `go test ./...`
+- Manual run (TUI): `go run .`
+- Manual run (Web): `go run . --web --port 8080`
 - Tests are table-driven where multiple cases exist
 - Each action package must have a `*_test.go`
 
@@ -44,6 +48,4 @@ cmd/ → internal/tui/ → internal/actions/ → internal/session/ → internal/
 |---|---|
 | `github.com/charmbracelet/bubbletea` | TUI event loop |
 | `github.com/charmbracelet/bubbles` | Text input, list components |
-| `github.com/charmbracelet/lipgloss` | Terminal styling |
 | `github.com/spf13/cobra` | CLI argument parsing |
-| `github.com/google/uuid` | UUID generation for fork/merge |

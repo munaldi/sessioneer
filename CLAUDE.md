@@ -13,7 +13,7 @@ Interactive CLI tool to browse, search, fork, merge, prune, trim, rename, and de
 - No classes; use plain structs and functions
 - `types` only in `pkg/types/` — no `any`, no type assertions without guards
 - Early return always
-- Import direction: `main.go → internal/tui/ → internal/actions/ → internal/session/ → internal/provider/ → pkg/types/` (never reverse)
+- Import direction: `main.go → internal/tui/ or internal/web/ → internal/actions/ → internal/session/ → internal/provider/ → pkg/types/` (never reverse)
 - All mutation goes through `internal/actions/`; `internal/session/` handles I/O only
 - Tests live next to the package they test (`*_test.go`, external `package foo_test`)
 
@@ -27,6 +27,7 @@ internal/
   provider/           # Provider detection + default dirs
   session/            # JSONL (Claude) and JSON (Copilot) I/O, stats
   tui/                # Bubble Tea model, view, styles, keys
+  web/                # Embedded static UI + REST API server
 pkg/types/            # Shared types — only place for type definitions
 ```
 
@@ -53,6 +54,8 @@ go run .                          # auto-detect providers
 go run . --provider claude        # force Claude Code
 go run . --provider copilot       # force GitHub Copilot
 go run . --provider claude --base /path/to/.claude/projects
+go run . --web                    # web UI + API on :8080
+go run . --web --port 9090        # web UI + API on :9090
 go test ./...
 ```
 
